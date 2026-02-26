@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: lpr-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: lpr
+      POSTGRES_USER: lpr
+      POSTGRES_PASSWORD: lpr
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: ../apps/api
+    container_name: lpr-api
+    depends_on:
+      - postgres
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: lpr
+      DB_USER: lpr
+      DB_PASSWORD: lpr
+    ports:
+      - "3000:3000"
+
+  web:
+    build:
+      context: ../apps/web
+    container_name: lpr-web
+    depends_on:
+      - api
+    ports:
+      - "5173:5173"
+
+volumes:
+  postgres_data:
