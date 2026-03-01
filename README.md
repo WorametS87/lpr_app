@@ -1,32 +1,43 @@
 # lpr_app
 
-Monorepo for a simple LPR web app.
+Monorepo for Thai LPR web application.
 
 ## Stack
-- Backend: NestJS + TypeORM + PostgreSQL
-- Frontend: React + MUI
 
-## Structure
-- `apps/api`: NestJS API (`POST /v1/infer/image`, `GET /health`)
-- `apps/web`: React + MUI client for upload and result dialog
-- `packages/shared-types`: Shared TypeScript types
-- `infra`: docker compose for local services
+- Backend: NestJS + TypeORM + PostgreSQL
+- Frontend: React + Vite + MUI
+
+## Services
+
+- `apps/api`: API (`POST /v1/infer/image`, `GET /health`)
+- `apps/web`: Web UI for image upload and detection result
+- `packages/shared-types`: shared TypeScript types
+
+## Setup Docs
+
+- Full teammate setup (recommended): `TEAM_SETUP.md`
+- System walkthrough: `HOW_IT_WORKS.md`
 
 ## Quick Start
-1. Install dependencies at repo root:
-   ```bash
-   npm install
-   ```
-2. Start PostgreSQL:
-   ```bash
-   docker compose -f infra/docker-compose.yml up -d postgres
-   ```
-3. Start API and Web in separate terminals:
-   ```bash
-   npm run dev:api
-   npm run dev:web
-   ```
 
-## Database Schema Mode
-- API uses TypeORM entity synchronization by default (`TYPEORM_SYNC=true`).
-- No migration step is required for local development.
+```bash
+npm install
+npm run dev:stack
+```
+
+Open: http://localhost:5173
+
+Notes:
+- API default URL is `http://localhost:3000`
+- Model server must be reachable at `MODEL_SERVER_URL`
+- Non-Docker API default: `http://localhost:8000`
+- Docker stack default: `http://host.docker.internal:8000`
+
+## Useful Commands
+
+```bash
+npm run dev:stack       # postgres + api + web via docker compose
+npm run dev:stack:down  # stop stack
+npm run dev:api         # api only
+npm run dev:web         # web only
+```

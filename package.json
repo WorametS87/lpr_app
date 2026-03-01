@@ -8,6 +8,8 @@
   "scripts": {
     "dev:api": "npm --workspace apps/api run start:dev",
     "dev:web": "npm --workspace apps/web run dev",
+    "dev:stack": "docker compose -f infra/docker-compose.yml up",
+    "dev:stack:down": "docker compose -f infra/docker-compose.yml down",
     "build:api": "npm --workspace apps/api run build",
     "build:web": "npm --workspace apps/web run build"
   }
