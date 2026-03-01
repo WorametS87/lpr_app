@@ -6,6 +6,30 @@ Single source of truth for onboarding teammates to run the full system:
 
 Keep this file identical in both repositories.
 
+System architecture reference:
+- `SYSTEM_FLOW.md` (in `lpr_app`)
+
+## 0) Recent modifications (March 2026)
+
+- Added one-command app stack in `lpr_app`:
+  - `npm run dev:stack` (web + api + postgres)
+  - `npm run dev:stack:down`
+- Docker stack API now defaults to `MODEL_SERVER_URL=http://host.docker.internal:8000`.
+- Debug UI in web app was expanded:
+  - debug is grouped per detection (not mixed across plates)
+  - each detection shows `FINAL OUTPUT` + `FULL PROCESS`
+  - every debug image shows resolution (`width x height`)
+  - OCR strategy label reflects OCR path used by model
+- Model debug payload now includes and web consumes:
+  - `plateCropInner` (province input crop, not shown in UI)
+  - `plateCropBottom`
+  - `provinceSource`, `bottomOcrProvince`, `bottomOcrScore`
+  - `detectionIndex`
+  - model response `detections[]` also includes `plateSource` and `provinceSource`
+- Model runtime profile updated for stability:
+  - use `LPR_DEVICE=cpu` (current `mps` path can crash YOLOX in this setup)
+  - use `LPR_DEBUG_MODE=1` to return debug images/crops
+
 ## 1) What teammates need
 
 Public repos:
@@ -42,7 +66,7 @@ git clone <LPR_APP_REPO_URL> lpr_app
 cd ~/work/lpr_new
 bash scripts/setup.sh
 bash scripts/check_runtime.sh
-.venv/bin/uvicorn serve:app --host 0.0.0.0 --port 8000
+LPR_DEVICE=cpu LPR_DEBUG_MODE=1 .venv/bin/uvicorn serve:app --host 0.0.0.0 --port 8000
 ```
 
 Model health check:
@@ -94,6 +118,9 @@ Expected:
 
 `lpr_new`:
 - model server at `http://localhost:8000`
+- recommended local flags:
+  - `LPR_DEVICE=cpu`
+  - `LPR_DEBUG_MODE=1`
 
 `lpr_app`:
 - API port `3000`
@@ -104,12 +131,18 @@ Expected:
 
 - Inference fails in UI/API:
   - model server down, wrong `MODEL_SERVER_URL`, or missing model files.
+- Inference fails with API `500` and model traceback mentions `torch.mps.FloatTensor`:
+  - restart model with `LPR_DEVICE=cpu`.
 - Web cannot reach API:
   - wrong `VITE_API_BASE_URL` or API not running.
 - API cannot connect DB:
   - Postgres container not running.
 - `ModuleNotFoundError: yolox` in model server:
   - rerun `bash scripts/setup.sh` in `lpr_new`.
+- Debug panel shows only timings:
+  - model started without `LPR_DEBUG_MODE=1`.
+- Detection count looks higher than expected:
+  - count is plate candidates, not car count; false positives can happen.
 
 ## 9) Stop services
 

@@ -12,7 +12,7 @@ There are **3 running services** talking to each other:
 Browser (React UI)
     │  upload image
     ▼
-NestJS API  :3001        ← TypeScript / Node.js backend
+NestJS API  :3000        ← TypeScript / Node.js backend
     │  forward image
     ▼
 FastAPI Model Server  :8000   ← Python / ML backend
@@ -27,6 +27,19 @@ The frontend talks only to NestJS. NestJS talks to the Python model server. The 
 
 ---
 
+## Recent Changes (March 2026)
+
+- Default API port standardized to `3000`.
+- Added one-command app stack in `lpr_app`: `npm run dev:stack`.
+- Debug UI now renders by detection index to keep each debug block tied to its own detection.
+- Debug images now display their pixel resolution.
+- Model debug payload now includes province input + bottom-strip crops and province source fields.
+- Recommended stable model startup for local use:
+  - `LPR_DEVICE=cpu`
+  - `LPR_DEBUG_MODE=1`
+
+---
+
 ## Step-by-Step: What Happens When You Click "Analyze"
 
 ### 1. Frontend sends the image
@@ -34,7 +47,7 @@ File: [apps/web/src/App.tsx](apps/web/src/App.tsx)
 
 The browser packages the image into a `multipart/form-data` request and POSTs it to:
 ```
-POST http://localhost:3001/v1/infer/image
+POST http://localhost:3000/v1/infer/image
 ```
 
 While waiting, it shows a spinner. The button is disabled.
@@ -107,7 +120,7 @@ Valid Thai plate formats it accepts:
 
 A ResNet18 model trained to classify the province from the bottom portion of the plate (the line with the province name). Returns province name + confidence score.
 
-Skipped for **red plates** (temporary/transit plates) — those are detected by checking if the plate's dominant color is red in HSV space.
+Province output is hidden unless confidence is high enough and plate OCR is acceptable.
 
 ---
 
@@ -116,8 +129,12 @@ File: [lpr_new/serve.py](../lpr_new/serve.py) — `_run_inference()`
 
 After inference, serve.py builds visual debug data:
 - **Annotated frame** — full image with bounding boxes drawn
-- **4 pipeline stage images** per plate (raw crop → dewarped → top70% → preprocessed)
+- **6 pipeline stage images** per plate in payload
+  - raw crop → dewarped → top70% → preprocessed → province input crop → bottom province strip
+  - frontend currently renders 5 stages and hides the province input crop
 - **OCR tokens** — raw text fragments EasyOCR saw with confidence scores
+- **OCR strategy path** — indicates which OCR path was selected
+- **Province source info** — classifier vs bottom OCR override
 - **Timings** — how many ms each step took
 
 All images are encoded as base64 JPEGs so they can be sent in JSON.
@@ -139,8 +156,12 @@ File: [apps/web/src/App.tsx](apps/web/src/App.tsx)
 A dialog pops up showing:
 - Plate number
 - Province
+- Plate source + province source (inside final output block in Debug Info)
 - OCR confidence / province confidence
-- A collapsible **Debug Info** section with all the pipeline stage images
+- A collapsible **Debug Info** section grouped by detection:
+  - final output
+  - full process stage images
+  - image resolution for each debug image
 
 ---
 
@@ -202,7 +223,7 @@ Key type: `InferenceResponse` — what NestJS returns to the browser:
 
 ### apps/api/.env
 ```
-PORT=3001                              # NestJS API port
+PORT=3000                              # NestJS API port
 CORS_ORIGIN=http://localhost:5173      # Allow requests from frontend
 DB_HOST / DB_PORT / DB_NAME / DB_USER / DB_PASSWORD   # PostgreSQL connection
 TYPEORM_SYNC=true                      # Auto-create DB tables on startup
@@ -211,16 +232,23 @@ MODEL_SERVER_URL=http://localhost:8000 # Where to find the Python model server
 
 ### apps/web/.env
 ```
-VITE_API_BASE_URL=http://localhost:3001   # Where to find the NestJS API
+VITE_API_BASE_URL=http://localhost:3000   # Where to find the NestJS API
 ```
 
 ### lpr_new model server (env vars, optional)
 ```
 LPR_DEVICE=cpu              # or 'cuda' if you have a GPU
+LPR_DEBUG_MODE=1            # include debug images/crops in response
 LPR_DETECTOR_CKPT=weights/yolo100/yolo_100ep.pth
 LPR_DETECTOR_EXP=weights/thai_plate_exp.py
 LPR_CLASSIFIER_DIR=weights/classifier
 LPR_MAX_SIZE=1280           # resize input frames larger than this before inference
+LPR_OCR_MIN_HEIGHT=220      # minimum plate crop height before OCR upscaling
+LPR_OCR_CANVAS_SIZE=1024    # EasyOCR canvas size
+LPR_OCR_RETRY_ANGLES=-10,-6,-3,3,6,10
+LPR_ENABLE_SLOW_PATHS=0
+LPR_ALWAYS_BOTTOM_OCR=0
+LPR_BOTTOM_OCR_MAX_CLASSIFIER_CONF=0.60
 ```
 
 ---

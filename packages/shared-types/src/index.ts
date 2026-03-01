@@ -17,7 +17,7 @@ export type PlateDebug = {
   plateCropDewarped: string;      // stage 2: after perspective dewarp
   plateCropTop70: string;         // stage 3: top 70% of dewarped (OCR number region)
   plateCropPreprocessed: string;  // stage 4: after CLAHE + unsharp mask (final OCR input)
-  plateCropInner: string;         // stage 5: frame/cover stripped (_crop_inner_plate)
+  plateCropInner: string;         // stage 5: province input crop (kept for debug payload)
   plateCropBottom: string;        // stage 6: bottom 30% of inner (province strip)
   ocrRegionUsed: string;          // top70 / full / top70_retry / full_retry / none / ...
   isRedPlate: boolean;
