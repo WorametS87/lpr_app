@@ -15,8 +15,7 @@ Monorepo for Thai LPR web application.
 
 ## Setup Docs
 
-- Teammate quickstart (short): `TEAM_QUICKSTART.md`
-- Full teammate setup (recommended): `TEAM_SETUP.md`
+- Team onboarding (single source): `TEAM_HANDOFF.md`
 - System walkthrough: `HOW_IT_WORKS.md`
 
 ## Quick Start
