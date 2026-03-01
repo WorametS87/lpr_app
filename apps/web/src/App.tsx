@@ -37,6 +37,21 @@ type ResultDialogState = {
 };
 
 // ---------------------------------------------------------------------------
+// OCR strategy path label
+// ---------------------------------------------------------------------------
+const OCR_STRATEGY_LABEL: Record<string, string> = {
+  top70:                '✓ top 70% — strict valid (fastest)',
+  full:                 '✓ full plate — strict valid',
+  top70_retry:          '↻ top 70% rotation retry — strict valid',
+  full_retry:           '↻ full plate rotation retry — strict valid',
+  top70_fallback:       '~ top 70% — soft fallback',
+  full_fallback:        '~ full plate — soft fallback',
+  top70_retry_fallback: '~ top 70% rotation retry — soft fallback',
+  full_retry_fallback:  '~ full plate rotation retry — soft fallback',
+  none:                 '✗ no valid text found',
+};
+
+// ---------------------------------------------------------------------------
 // Debug panel shown inside the result dialog
 // ---------------------------------------------------------------------------
 function DebugPanel({ debugInfo }: { debugInfo: DebugInfo }) {
@@ -53,7 +68,7 @@ function DebugPanel({ debugInfo }: { debugInfo: DebugInfo }) {
         <AccordionDetails>
           <Stack spacing={2}>
 
-            {/* Timing */}
+            {/* Timings */}
             <Box>
               <Typography variant="caption" color="text.secondary" fontWeight={600} display="block" mb={0.5}>
                 TIMINGS
@@ -67,7 +82,7 @@ function DebugPanel({ debugInfo }: { debugInfo: DebugInfo }) {
 
             <Divider />
 
-            {/* Annotated full image */}
+            {/* Annotated full frame */}
             {annotatedImage && (
               <Box>
                 <Typography variant="caption" color="text.secondary" fontWeight={600} display="block" mb={0.5}>
@@ -87,38 +102,38 @@ function DebugPanel({ debugInfo }: { debugInfo: DebugInfo }) {
               <Box key={i}>
                 <Divider />
                 <Typography variant="caption" color="text.secondary" fontWeight={600} display="block" mt={1} mb={1}>
-                  PLATE {i + 1} DETAILS
+                  PLATE {i + 1} — FULL PROCESS
                 </Typography>
 
+                {/* --- Step 1: Detection --- */}
+                <Typography variant="caption" fontWeight={600} display="block" mt={1} mb={0.5}>
+                  Step 1 · YOLOX Detection
+                </Typography>
                 <Table size="small" sx={{ mb: 1 }}>
                   <TableBody>
                     <TableRow>
-                      <TableCell sx={{ color: 'text.secondary', width: 160 }}>Detection conf</TableCell>
+                      <TableCell sx={{ color: 'text.secondary', width: 180 }}>Detection confidence</TableCell>
                       <TableCell>{(plate.detectionConf * 100).toFixed(1)}%</TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell sx={{ color: 'text.secondary' }}>OCR region used</TableCell>
-                      <TableCell>
-                        <Chip size="small" label={plate.ocrRegionUsed} variant="outlined" />
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
                       <TableCell sx={{ color: 'text.secondary' }}>Red plate</TableCell>
-                      <TableCell>{plate.isRedPlate ? 'Yes (province skipped)' : 'No'}</TableCell>
+                      <TableCell>{plate.isRedPlate ? 'Yes — province classification skipped' : 'No'}</TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
 
-                {/* Pipeline stages */}
-                <Typography variant="caption" color="text.secondary" fontWeight={600} display="block" mb={0.5}>
-                  PIPELINE STAGES
+                {/* --- Step 2: Pipeline stage images --- */}
+                <Typography variant="caption" fontWeight={600} display="block" mt={1} mb={0.5}>
+                  Step 2 · Preprocessing Pipeline (6 stages)
                 </Typography>
                 <Stack direction="row" spacing={1} mb={1} flexWrap="wrap">
                   {([
-                    { key: 'plateCrop',          label: '1. Raw crop' },
-                    { key: 'plateCropDewarped',  label: '2. Dewarped' },
-                    { key: 'plateCropTop70',     label: '3. Top 70%' },
-                    { key: 'plateCropPreprocessed', label: '4. CLAHE + sharpen' },
+                    { key: 'plateCrop',             label: '① Raw crop' },
+                    { key: 'plateCropDewarped',     label: '② Dewarped' },
+                    { key: 'plateCropTop70',        label: '③ Top 70% (number)' },
+                    { key: 'plateCropPreprocessed', label: '④ CLAHE + sharpen' },
+                    { key: 'plateCropInner',        label: '⑤ Frame stripped (inner)' },
+                    { key: 'plateCropBottom',       label: '⑥ Bottom 30% (province)' },
                   ] as { key: keyof typeof plate; label: string }[]).map(({ key, label }) =>
                     plate[key] ? (
                       <Box key={key} flex="1 1 40%" minWidth={0}>
@@ -136,11 +151,32 @@ function DebugPanel({ debugInfo }: { debugInfo: DebugInfo }) {
                   )}
                 </Stack>
 
-                {/* Raw OCR tokens */}
+                {/* --- Step 3: OCR --- */}
+                <Typography variant="caption" fontWeight={600} display="block" mt={1} mb={0.5}>
+                  Step 3 · OCR (Plate Number)
+                </Typography>
+                <Table size="small" sx={{ mb: 1 }}>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell sx={{ color: 'text.secondary', width: 180 }}>Strategy used</TableCell>
+                      <TableCell>
+                        <Chip
+                          size="small"
+                          label={plate.ocrRegionUsed}
+                          variant="outlined"
+                          color={plate.ocrRegionUsed === 'none' ? 'error' : plate.ocrRegionUsed.includes('fallback') ? 'warning' : 'success'}
+                        />
+                        <Typography variant="caption" color="text.secondary" display="block" mt={0.3}>
+                          {OCR_STRATEGY_LABEL[plate.ocrRegionUsed] ?? plate.ocrRegionUsed}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
                 {plate.ocrRawTokens.length > 0 && (
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600} display="block" mb={0.5}>
-                      RAW OCR TOKENS (top 70%)
+                  <Box mb={1}>
+                    <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>
+                      Raw OCR tokens from top 70%:
                     </Typography>
                     <Table size="small">
                       <TableBody>
@@ -154,6 +190,42 @@ function DebugPanel({ debugInfo }: { debugInfo: DebugInfo }) {
                     </Table>
                   </Box>
                 )}
+
+                {/* --- Step 4: Province --- */}
+                {!plate.isRedPlate && (
+                  <>
+                    <Typography variant="caption" fontWeight={600} display="block" mt={1} mb={0.5}>
+                      Step 4 · Province Detection
+                    </Typography>
+                    <Table size="small" sx={{ mb: 1 }}>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell sx={{ color: 'text.secondary', width: 180 }}>Source</TableCell>
+                          <TableCell>
+                            <Chip
+                              size="small"
+                              label={plate.provinceSource === 'bottom_ocr' ? 'Bottom OCR (overrode classifier)' : 'ResNet18 classifier'}
+                              color={plate.provinceSource === 'bottom_ocr' ? 'warning' : 'default'}
+                              variant="outlined"
+                            />
+                          </TableCell>
+                        </TableRow>
+                        {plate.bottomOcrProvince && (
+                          <TableRow>
+                            <TableCell sx={{ color: 'text.secondary' }}>Bottom OCR read</TableCell>
+                            <TableCell>
+                              {plate.bottomOcrProvince}
+                              <Typography variant="caption" color="text.secondary" ml={1}>
+                                ({(plate.bottomOcrScore * 100).toFixed(1)}% match)
+                              </Typography>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </>
+                )}
+
               </Box>
             ))}
 
