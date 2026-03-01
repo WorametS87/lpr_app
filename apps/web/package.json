@@ -11,6 +11,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@lpr/shared-types": "*",
+    "@mui/icons-material": "^7.3.8",
     "@mui/material": "^6.4.6",
     "axios": "^1.8.2",
     "react": "^18.3.1",

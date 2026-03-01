@@ -11,5 +11,5 @@ export default new DataSource({
   password: process.env.DB_PASSWORD ?? 'lpr',
   database: process.env.DB_NAME ?? 'lpr',
   entities: [InferenceRequestEntity, DetectionEntity],
-  migrations: ['src/database/migrations/*.ts']
+  synchronize: (process.env.TYPEORM_SYNC ?? 'true') === 'true'
 });

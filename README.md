@@ -21,12 +21,12 @@ Monorepo for a simple LPR web app.
    ```bash
    docker compose -f infra/docker-compose.yml up -d postgres
    ```
-3. Run database migrations:
-   ```bash
-   npm run migration:run
-   ```
-4. Start API and Web in separate terminals:
+3. Start API and Web in separate terminals:
    ```bash
    npm run dev:api
    npm run dev:web
    ```
+
+## Database Schema Mode
+- API uses TypeORM entity synchronization by default (`TYPEORM_SYNC=true`).
+- No migration step is required for local development.

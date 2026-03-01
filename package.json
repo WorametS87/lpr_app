@@ -9,8 +9,6 @@
     "dev:api": "npm --workspace apps/api run start:dev",
     "dev:web": "npm --workspace apps/web run dev",
     "build:api": "npm --workspace apps/api run build",
-    "build:web": "npm --workspace apps/web run build",
-    "migration:run": "npm --workspace apps/api run migration:run",
-    "migration:revert": "npm --workspace apps/api run migration:revert"
+    "build:web": "npm --workspace apps/web run build"
   }
 }

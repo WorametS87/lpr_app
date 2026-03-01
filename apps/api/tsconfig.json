@@ -16,7 +16,8 @@
     "esModuleInterop": true,
     "moduleResolution": "node",
     "types": [
-      "node"
+      "node",
+      "multer"
     ]
   },
   "include": [

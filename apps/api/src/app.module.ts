@@ -15,8 +15,7 @@ import { InferenceRequestEntity } from './database/entities/inference-request.en
       password: process.env.DB_PASSWORD ?? 'lpr',
       database: process.env.DB_NAME ?? 'lpr',
       entities: [InferenceRequestEntity, DetectionEntity],
-      migrations: ['dist/database/migrations/*.js'],
-      synchronize: false,
+      synchronize: (process.env.TYPEORM_SYNC ?? 'true') === 'true',
       logging: false
     }),
     InferModule

@@ -1,1 +1,22 @@
-node_modules
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+apps/web/tsconfig.tsbuildinfo
+
+# Environment files (contain secrets/local config)
+.env
+apps/api/.env
+apps/web/.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

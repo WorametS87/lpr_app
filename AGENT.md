@@ -118,22 +118,43 @@ If no detection:
 - Request + detection rows written to PostgreSQL.
 - Health endpoint passes.
 
-## Commands (Example)
+## How to Run
 
-API:
-```bash
-npm run start:dev
-```
+### Prerequisites
+- Docker running with the `lpr-postgres` container (port 5432)
+- `lpr_new` project with `.venv` set up
 
-Web:
+### Step 1 — Model server (from `lpr_new/`)
 ```bash
-npm run dev
+cd ~/work/lpr_new
+.venv/bin/uvicorn serve:app --host 0.0.0.0 --port 8000 --reload --reload-dir src --reload-dir . --reload-include "*.py"
 ```
+Loads `ThaiLPRPipeline` (YOLOX + OCR + province classifier) once at startup.
+Exposes `POST /infer` and `GET /health` on port **8000**.
 
-DB:
+### Step 2 — NestJS API (from `lpr_app/`)
 ```bash
-docker compose up -d postgres
+cd ~/work/lpr_app
+PORT=3001 npm run dev:api
 ```
+Port 3001 is used because port 3000 is occupied by `lcams-backend`.
+Reads `MODEL_SERVER_URL` from `apps/api/.env` (default: `http://localhost:8000`).
+
+### Step 3 — Frontend (from `lpr_app/`)
+```bash
+cd ~/work/lpr_app
+npm run dev:web
+```
+Reads `VITE_API_BASE_URL` from `apps/web/.env` (set to `http://localhost:3001`).
+Opens at **http://localhost:5173**.
+
+### Service map
+| Service | Port | Notes |
+|---|---|---|
+| Frontend (Vite) | 5173 | React + MUI |
+| NestJS API | 3001 | NestJS + TypeORM |
+| FastAPI model server | 8000 | ThaiLPRPipeline |
+| PostgreSQL | 5432 | Docker container `lpr-postgres` |
 
 ## Guardrails
 
