@@ -1,4 +1,4 @@
-# Thai LPR — Full System Guide
+# Full System Guide
 
 Everything you need to understand, run, and explain the full Thai License Plate Recognition system.
 Covers both repos: `lpr_new` (Python model server) and `lpr_app` (web app + API).

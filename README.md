@@ -15,9 +15,10 @@ Monorepo for Thai LPR web application.
 
 ## Setup Docs
 
-- Team onboarding (single source): `TEAM_HANDOFF.md`
-- Cross-repo system flow: `SYSTEM_FLOW.md`
-- System walkthrough: `HOW_IT_WORKS.md`
+- Documentation hub: [`md/README.md`](md/README.md)
+- Team onboarding: [`md/guides/team-handoff.md`](md/guides/team-handoff.md)
+- Service architecture: [`md/guides/system-flow.md`](md/guides/system-flow.md)
+- Request walkthrough: [`md/guides/request-lifecycle.md`](md/guides/request-lifecycle.md)
 
 ## Quick Start
 
@@ -36,7 +37,13 @@ Notes:
 - For local model stability, run model with:
   - `LPR_DEVICE=cpu`
   - `LPR_DEBUG_MODE=1` (enables debug crops/images)
-- Model debug payload includes source metadata (`ocrRegionUsed`, `provinceSource`) used by the web debug panel.
+- Model response includes per-detection source metadata (`plateSource`, `provinceSource`) and per-plate debug trace (`ocrTrace`).
+
+## Workspace Docs
+
+- [`apps/api/README.md`](apps/api/README.md)
+- [`apps/web/README.md`](apps/web/README.md)
+- [`packages/shared-types/README.md`](packages/shared-types/README.md)
 
 ## Useful Commands
 
