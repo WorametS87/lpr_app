@@ -16,6 +16,8 @@ interface ModelDetection {
   province: string | null;
   ocrConf: number;
   provinceConf: number;
+  plateSource?: string;
+  provinceSource?: string;
   bbox: [number, number, number, number];
 }
 
@@ -69,6 +71,8 @@ export class InferService {
           province: d.province,
           ocrConf: d.ocrConf,
           provinceConf: d.provinceConf,
+          plateSource: d.plateSource,
+          provinceSource: d.provinceSource,
           bbox: d.bbox
         })),
         message:

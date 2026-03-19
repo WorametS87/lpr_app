@@ -3,12 +3,37 @@ export type DetectionResult = {
   province: string | null;
   ocrConf: number;
   provinceConf: number;
+  plateSource?: string;
+  provinceSource?: string;
   bbox: [number, number, number, number];
 };
 
 export type OcrToken = {
   text: string;
   conf: number;
+};
+
+export type TraceValue = string | number | boolean | null;
+
+export type TraceRecord = {
+  [key: string]: TraceValue | TraceRecord | TraceRecord[] | TraceValue[];
+};
+
+export type OcrTraceStep = {
+  stage: string;
+  ocrTokens?: OcrToken[];
+  ocr_tokens?: OcrToken[];
+  candidates?: TraceRecord[];
+  expanded?: TraceRecord[];
+  pickResult?: TraceRecord | null;
+  pick_result?: TraceRecord | null;
+  isSoft?: boolean;
+  is_soft?: boolean;
+  earlyExit?: boolean;
+  early_exit?: boolean;
+  imageB64?: string | null;
+  image_b64?: string | null;
+  note?: string;
 };
 
 export type PlateDebug = {
@@ -26,6 +51,8 @@ export type PlateDebug = {
   provinceSource: string;         // "classifier" or "bottom_ocr"
   bottomOcrProvince: string | null;
   bottomOcrScore: number;
+  ocrTrace?: OcrTraceStep[];
+  ocr_trace?: OcrTraceStep[];
 };
 
 export type DebugInfo = {

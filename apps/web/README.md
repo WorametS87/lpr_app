@@ -30,6 +30,25 @@ Open:
 
 - http://localhost:5173
 
+## Project structure
+
+This web app now follows the same layered method used in `lcams-frontend`:
+
+```text
+src/
+├── components/        # Presentation components (common + feature UI)
+├── constants/         # API paths and static labels
+├── controllers/       # UI/business orchestration hooks
+├── pages/             # Page-level containers
+├── router/            # App route composition
+├── services/          # API client + domain service calls
+├── theme/             # MUI theme
+├── types/             # Frontend-only view state types
+├── utils/             # Small shared helpers
+├── App.tsx            # Global providers + router
+└── main.tsx           # React bootstrap
+```
+
 ## Notes
 
 - Ensure API is running and reachable at `VITE_API_BASE_URL`.
